@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "yarn install && yarn build",
-    "start": "vite start",
-    "install-deps": "yarn install"
+    "build": "vite build",
+    "start": "vite",
+    "preview": "vite preview"
   },
   "engines": {
     "node": ">=16.0.0",
