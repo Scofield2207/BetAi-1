@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cyarn install && yarn build",
+    "build": "yarn install && yarn build",
     "start": "vite start",
     "install-deps": "yarn install"
   },
