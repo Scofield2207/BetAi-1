@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "cd frontend && yarn install && yarn build",
-    "start": "cd frontend && vite start",
-    "install-deps": "cd frontend && yarn install"
+    "build": "yarn install && yarn build",
+    "start": "vite start",
+    "install-deps": "yarn install"
   },
   "engines": {
     "node": ">=16.0.0",
