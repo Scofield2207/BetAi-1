@@ -1,0 +1,14 @@
+{
+  "name": "betai-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && yarn install && yarn build",
+    "start": "cd frontend && vite start",
+    "install-deps": "cd frontend && yarn install"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
