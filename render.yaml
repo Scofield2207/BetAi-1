@@ -1,25 +1,21 @@
-services:
-  # Backend Flask
-  - type: web
-    name: betai-backend
-    runtime: python
-    plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: cd backend && gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 30
-    envVars:
-      - key: PYTHON_VERSION
-        value: "3.9.16"
-      - key: FLASK_ENV
-        value: "production"
-      - key: FLASK_DEBUG
-        value: "false"
-      - key: SECRET_KEY
-        value: "betai_secret_key_2024_production_very_long_and_secure_random_string"
-      - key: DATABASE_PATH
-        value: "betai.db"
-      - key: ADMIN_USERNAME
-        value: "GxFelix"
-      - key: ADMIN_PASSWORD
-        value: "#11+=!Nagildas"
-      - key: WEBHOOK_SECRET
-        value: "webhook_secret_betai_2024_production_secure"
+{
+  "name": "betai-app",
+  "version": "1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
