@@ -1,6 +1,6 @@
 const API_CONFIG = {
   // Base URL configurable par variable d'environnement (fallback localhost)
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+  BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
   ENDPOINTS: {
     // Authentification
     LOGIN: '/login',

@@ -1,7 +1,7 @@
 // Configuration de production pour BetAI
 const productionConfig = {
   // URL de l'API backend
-  API_BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+  API_BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
   
   // Configuration de l'environnement
   ENVIRONMENT: 'production',

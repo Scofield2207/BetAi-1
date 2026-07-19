@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import authService from '../services/authService';
 import './NavBar.css';
 
-function NavBar({ currentPage, onNavigate }) {
+function NavBar({ currentPage, onNavigate, session, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -67,13 +68,10 @@ function NavBar({ currentPage, onNavigate }) {
         </button>
 
         <div className={`navbar-menu ${menuOpen ? 'open' : ''}`}>
-          {currentPage === 'landing' ? (
+          {currentPage === 'landing' && !session ? (
             <>
               <a href="#features" onClick={(e) => handleLinkClick(e, '#features')}>
                 Fonctionnalités
-              </a>
-              <a href="#testimonials" onClick={(e) => handleLinkClick(e, '#testimonials')}>
-                Avis de nos clients
               </a>
               <a href="#faq" onClick={(e) => handleLinkClick(e, '#faq')}>
                 FAQ
@@ -81,12 +79,37 @@ function NavBar({ currentPage, onNavigate }) {
             </>
           ) : null}
           
-          <button
-            className="navbar-btn navbar-btn-primary"
-            onClick={() => handleNavClick('analysis')}
-          >
-            {currentPage === 'landing' ? 'Analyser' : 'Nouvelle Analyse'}
-          </button>
+          {session ? (
+            <>
+              <span className="navbar-session-info">
+                Licence active ({authService.getDaysRemaining()}j restants)
+              </span>
+              {currentPage !== 'analysis' && (
+                <button
+                  className="navbar-btn navbar-btn-primary"
+                  onClick={() => handleNavClick('analysis')}
+                >
+                  Ouvrir l'IA
+                </button>
+              )}
+              <button
+                className="navbar-btn navbar-btn-outline"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onLogout && onLogout();
+                }}
+              >
+                Déconnexion
+              </button>
+            </>
+          ) : (
+            <button
+              className="navbar-btn navbar-btn-primary"
+              onClick={(e) => handleLinkClick(e, '#connexion')}
+            >
+              Se Connecter
+            </button>
+          )}
           
         </div>
       </nav>

@@ -13,7 +13,13 @@ function CrashForm({ onSubmit, loading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const crashHistory = inputs.map(Number).filter(val => !isNaN(val));
+    const crashHistory = inputs
+      .map((value) => {
+        const normalized = String(value).trim().replace(',', '.');
+        return parseFloat(normalized);
+      })
+      .filter((val) => !Number.isNaN(val) && val > 1.0);
+
     if (crashHistory.length >= 5) {
       onSubmit(crashHistory, aiMode);
     }
@@ -32,6 +38,10 @@ function CrashForm({ onSubmit, loading }) {
         return 'Analyse équilibrée entre risque et performance';
       case 'agressif':
         return 'Analyse audacieuse pour maximiser les gains';
+      case 'recuperation':
+        return 'Détecte les séries noires pour anticiper un rebond sécurisé';
+      case 'jackpot':
+        return 'Vise les multiplicateurs massifs (> 5x) sur base d\'anomalies';
       default:
         return '';
     }
@@ -40,11 +50,15 @@ function CrashForm({ onSubmit, loading }) {
   const getAiModeIcon = (mode) => {
     switch (mode) {
       case 'prudent':
-        return ' ';
+        return '🛡️';
       case 'equilibre':
-        return ' ';
+        return '⚖️';
       case 'agressif':
-        return ' ';
+        return '🔥';
+      case 'recuperation':
+        return '🔁';
+      case 'jackpot':
+        return '🚀';
       default:
         return '';
     }
@@ -77,9 +91,9 @@ function CrashForm({ onSubmit, loading }) {
                 <div className="input-wrapper">
                   <input
                     id={`crash-${i}`}
-                    type="number"
-                    step="0.1"
-                    min="1.0"
+                    type="text"
+                    inputMode="decimal"
+                    pattern="^[0-9]*\.?[0-9]*$"
                     value={val}
                     onChange={(e) => handleChange(i, e.target.value)}
                     placeholder={`Ex: ${(1.5 + i * 0.3).toFixed(1)}`}
@@ -93,44 +107,12 @@ function CrashForm({ onSubmit, loading }) {
           </div>
         </div>
 
-        <div className="ai-mode-section">
-          <div className="section-title">
-         
-            <h3>Configuration IA</h3>
-          </div>
-          
-          <div className="ai-mode-selector">
-            <div className="mode-options">
-              {['prudent', 'equilibre', 'agressif'].map((mode) => (
-                <button
-                  type="button"
-                  key={mode}
-                  className={`mode-option ${aiMode === mode ? 'active' : ''}`}
-                  onClick={() => setAiMode(mode)}
-                  aria-pressed={aiMode === mode}
-                >
-                  <span className="mode-icon">{getAiModeIcon(mode)}</span>
-                  <span className="mode-name">
-                    {mode === 'prudent' ? 'Prudent' :
-                     mode === 'equilibre' ? 'Équilibré' : 'Agressif'}
-                  </span>
-                </button>
-              ))}
-            </div>
-            
-            <div className="mode-description">
-              <p>{getAiModeDescription(aiMode)}</p>
-            </div>
-          </div>
-        </div>
-        
         <div className="form-actions">
           <button 
             type="button" 
             onClick={handleQuickFill}
             className="btn-secondary"
           >
-      
             <span>Remplir avec exemple</span>
           </button>
           
@@ -146,11 +128,43 @@ function CrashForm({ onSubmit, loading }) {
               </>
             ) : (
               <>
-
                 <span>Analyser avec l'IA</span>
               </>
             )}
           </button>
+        </div>
+
+        <div className="ai-mode-section">
+          <div className="section-title">
+         
+            <h3>Configuration IA</h3>
+          </div>
+          
+          <div className="ai-mode-selector">
+            <div className="mode-options" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))' }}>
+              {['prudent', 'equilibre', 'agressif', 'recuperation', 'jackpot'].map((mode) => (
+                <button
+                  type="button"
+                  key={mode}
+                  className={`mode-option ${aiMode === mode ? 'active' : ''}`}
+                  onClick={() => setAiMode(mode)}
+                  aria-pressed={aiMode === mode}
+                >
+                  <span className="mode-icon">{getAiModeIcon(mode)}</span>
+                  <span className="mode-name">
+                    {mode === 'prudent' ? 'Prudent' :
+                     mode === 'equilibre' ? 'Équilibré' : 
+                     mode === 'agressif' ? 'Agressif' : 
+                     mode === 'recuperation' ? 'Récupération' : 'Jackpot'}
+                  </span>
+                </button>
+              ))}
+            </div>
+            
+            <div className="mode-description">
+              <p>{getAiModeDescription(aiMode)}</p>
+            </div>
+          </div>
         </div>
       </form>
     </div>

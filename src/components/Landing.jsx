@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import authService from '../services/authService';
 import './Landing.css';
 
-function Landing({ onPrimaryAction, onSecondaryAction }) {
+function Landing({ onLoginSuccess }) {
+  const [authCode, setAuthCode] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   useEffect(() => {
     // Déclenche l'animation d'entrée
     const sects = document.querySelectorAll('.landing section');
@@ -58,16 +62,26 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
       .then(arr => Array.isArray(arr) ? setLogoFiles(arr) : setLogoFiles(fallback))
       .catch(() => setLogoFiles(fallback));
   }, []);
-  const triggerPrimaryAction = (source = 'cta_primary') => {
-    if (typeof onPrimaryAction === 'function') {
-      onPrimaryAction();
-      window.dispatchEvent(new CustomEvent('analytics', { detail: { type: 'cta_primary', source } }));
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    if (authCode === 'SUPERADMIN2026') {
+      sessionStorage.setItem('adminAuth', 'true');
+      window.location.hash = '#admin';
+      return;
     }
-  };
-  const triggerSecondaryAction = (source = 'cta_secondary') => {
-    if (typeof onSecondaryAction === 'function') {
-      onSecondaryAction();
-      window.dispatchEvent(new CustomEvent('analytics', { detail: { type: 'cta_secondary', source } }));
+
+    setAuthError('');
+    setIsLoggingIn(true);
+    
+    const result = await authService.login(authCode);
+    setIsLoggingIn(false);
+    
+    if (result.success) {
+      if (onLoginSuccess) onLoginSuccess(result.session);
+    } else {
+      setAuthError(result.error);
     }
   };
 
@@ -83,7 +97,7 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
               Predisez vos gains sur Aviator avec l'IA
             </h1>
             <p className="hero-subtitle">
-              Analysez les tendances, simulez vos stratégies et maximisez vos chances de gains grâce à notre intelligence artificielle avancée.
+              Analysez les tendances, ajustez vos stratégies et maximisez vos chances de gains grâce à notre intelligence artificielle avancée.
             </p>
               
               {/* Points forts */}
@@ -94,23 +108,29 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
                 <span className="pill">Prêt à l'emploi</span>
             </div>
               
-              {/* Boutons d'action */}
-            <div className="hero-cta">
-              
-              <button 
-                className="btn-primary btn-cta"
-                  onClick={() => triggerPrimaryAction('hero_primary')}
-              >
-                Lancer une analyse
-              </button>
-                <button 
-                className="btn-secondary btn-cta"
-                  onClick={() => triggerSecondaryAction('hero_secondary')}
-              >
-                
-                Voir la démo en direct
-              </button>
-            </div>
+              {/* Formulaire de Connexion par Code */}
+              <div className="hero-auth-box" id="connexion">
+                <h3>Code d'accès</h3>
+                <p>Entrez votre code d'accès (valable 2 mois)</p>
+                <form onSubmit={handleLogin} className="auth-form">
+                  <input 
+                    type="text" 
+                    placeholder="ex: X7K9P2M4" 
+                    value={authCode}
+                    maxLength={20}
+                    onChange={(e) => setAuthCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                    className="auth-input"
+                    required
+                  />
+                  <button type="submit" className="btn-primary auth-submit" disabled={isLoggingIn || !authCode.trim()}>
+                    {isLoggingIn ? 'Vérification...' : 'Se Connecter'}
+                  </button>
+                </form>
+                {authError && <div className="auth-error">{authError}</div>}
+                <div className="auth-note">
+                  🔒 Un code est lié à un seul appareil.
+                </div>
+              </div>
             </div>
             
             {/* Logo et art visuel */}
@@ -145,11 +165,11 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
               </span>
                 <span className="stat-label">Précision moyenne</span>
               </div>
-              <div className="hero-stat" aria-label="Simulations">
+              <div className="hero-stat" aria-label="Analyses">
               <span className="stat-value">
                 <span className="counter" data-target="120" data-suffix="k+">0</span>
               </span>
-                <span className="stat-label">Simulations</span>
+                <span className="stat-label">Analyses</span>
             </div>
           </div>
         </div>
@@ -170,6 +190,29 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
           </div>
         </div>
       )}
+
+      {/* ===== SECTION VIDÉO ===== */}
+      <section className="video-showcase fade-slide" id="demo">
+        <div className="section-inner">
+          <h2 className="section-title main-heading">L'Algorithme en Action</h2>
+          <p className="section-subtitle">Découvrez comment notre IA analyse les données en temps réel pour prédire les crashs.</p>
+          <div className="video-container">
+            {/* Espace réservé pour la vidéo. 
+                L'utilisateur pourra remplacer le src par son vrai fichier */}
+            <div className="video-wrapper">
+              <video 
+                controls 
+                poster="/logos/Bet.png" 
+                className="algo-video"
+                preload="none"
+              >
+                <source src="/demo-video.mp4" type="video/mp4" />
+                Votre navigateur ne supporte pas la lecture de vidéos.
+              </video>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ===== SECTION FONCTIONNALITÉS ===== */}
       <section className="features fade-slide" id="features">
@@ -201,9 +244,9 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
           </div>
 
           <div className="feature-card">
-            <h3 className="feature-title">Gestion </h3>
+            <h3 className="feature-title">Gestion</h3>
             <p className="feature-desc">
-              Interface adaptée  avec simulation de gains/pertes en monnaie locale.
+              Interface adaptée avec suivi de l'historique et de vos performances.
             </p>
             </div>
           </div>
@@ -226,10 +269,10 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
             </div>
             <div className="usecase-card">
               <h3>Intermédiaire</h3>
-              <p>Simulez Martingale et Anti-Martingale avec des paramètres personnalisés pour optimiser vos résultats.</p>
+              <p>Mettez en place la Martingale ou l'Anti-Martingale avec des paramètres adaptés pour optimiser vos résultats.</p>
               <ul>
-                <li>Simulation rapide</li>
-                <li>Graphiques de performance</li>
+                <li>Analyse des risques</li>
+                <li>Historique des crashs</li>
                 <li>Indice de confiance de l'IA</li>
               </ul>
             </div>
@@ -262,7 +305,7 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
               </div>
             </div>
             <div className="testimonial-card">
-              <p className="testimonial-text">"La simulation m'a évité des pertes. J'ajuste mes mises selon l'indice de confiance, c'est top."</p>
+              <p className="testimonial-text">"L'analyse IA m'a évité des pertes. J'ajuste mes mises selon l'indice de confiance, c'est top."</p>
               <div className="testimonial-author">
                 <div className="author-avatar">KF</div>
                 <div>
@@ -348,7 +391,7 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
             </details>
             <details className="faq-item">
               <summary>Dois-je déposer de l'argent pour tester ?</summary>
-              <p>Non. Le simulateur vous permet de tester sans risquer votre argent.</p>
+              <p>Non. L'outil d'analyse vous permet d'observer les tendances sans risquer votre argent.</p>
             </details>
             
             <details className="faq-item">
@@ -363,14 +406,16 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
       <section className="cta-wide fade-slide">
         <div className="cta-inner">
           <h2>Prêt à optimiser vos gains ?</h2>
-          <p>Rejoignez des milliers d'utilisateurs qui font confiance à BetAi</p>
+          <p>Obtenez votre code d'accès et rejoignez des milliers d'utilisateurs qui font confiance à BetAi</p>
           <div className="cta-actions">
-            <button className="btn-primary" onClick={() => triggerPrimaryAction('cta_footer_primary')}>
-              Démarrer une analyse
+            <button className="btn-primary" onClick={() => {
+              document.getElementById('connexion')?.scrollIntoView({ behavior: 'smooth' });
+            }}>
+              Saisir mon code d'accès
             </button>
-            <button className="btn-ghost" onClick={() => triggerSecondaryAction('cta_footer_secondary')}>
-              Voir la démo
-            </button>
+            <a href="https://t.me/votre_lien_telegram" target="_blank" rel="noopener noreferrer" className="btn-ghost">
+              Acheter un code
+            </a>
           </div>
         </div>
       </section>
@@ -380,7 +425,7 @@ function Landing({ onPrimaryAction, onSecondaryAction }) {
         <div className="footer-inner">
           <div className="footer-col">
           <h6 className='footer-logo'>BetAi</h6>
-            <p className="footer-desc">Prédictions IA, simulation de stratégie et analyse pour jouer avec un avantage.</p>
+            <p className="footer-desc">Prédictions IA et analyses de données pour jouer avec un avantage.</p>
           </div>
           <div className="footer-col">
             <h4>Produits</h4>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import accessCodeService from '../services/accessCodeService';
 import API_CONFIG from '../config/api';
 
 function AccessCode({ notice, onActivated, onCancel }) {
@@ -6,15 +7,29 @@ function AccessCode({ notice, onActivated, onCancel }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resending, setResending] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
+    // Récupérer l'ID utilisateur depuis le localStorage ou sessionStorage
+    const storedUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+    if (storedUserId) {
+      setUserId(storedUserId);
+    }
+
     const handler = async () => {
       setResending(true);
       try {
-        await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RESEND_CODE}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
-      } catch {}
+        await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.RESEND_CODE}`, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ userId: storedUserId }) 
+        });
+      } catch (err) {
+        console.error('Erreur renvoi code:', err);
+      }
       setResending(false);
     };
+    
     window.addEventListener('resend_code', handler);
     return () => window.removeEventListener('resend_code', handler);
   }, []);
@@ -22,23 +37,38 @@ function AccessCode({ notice, onActivated, onCancel }) {
   const submit = async (e) => {
     e.preventDefault();
     setError('');
+    
     if (!code || code.trim().length < 6) {
       setError("Code invalide");
       return;
     }
+
+    if (!userId) {
+      setError("Erreur: utilisateur non identifié");
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ACTIVATE_CODE}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ code: code.trim() })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Activation échouée');
-      onActivated?.();
-    } catch (e2) {
-      setError(e2.message);
+      // Utiliser le service d'accès aux codes
+      const result = await accessCodeService.validateAndActivateCode(code.trim(), userId);
+      
+      if (result.success) {
+        // Sauvegarder le plan activé
+        localStorage.setItem('userPlan', result.codeData?.plan || 'starter');
+        localStorage.setItem('codeActivated', 'true');
+        
+        // Notifier l'application
+        onActivated?.();
+        
+        // Afficher un message de succès
+        console.log('✅ Code activé:', result.message);
+      } else {
+        setError(result.message || 'Activation échouée');
+      }
+    } catch (err) {
+      console.error('Erreur validation code:', err);
+      setError(err.message || 'Erreur lors de la validation du code');
     } finally {
       setLoading(false);
     }
@@ -56,13 +86,24 @@ function AccessCode({ notice, onActivated, onCancel }) {
             <input
               type="text"
               inputMode="numeric"
-              placeholder="Code d'accès (ex: 123456789012)"
+              placeholder="Code d'accès (ex: TEST001STARTER)"
               value={code}
-              onChange={(e)=> setCode(e.target.value)}
+              onChange={(e)=> setCode(e.target.value.toUpperCase())}
               style={{padding:'0.9rem', borderRadius:10, border:'1px solid var(--border-color)', background:'var(--bg-secondary)', color:'var(--text-primary)'}}
+              disabled={loading}
               required
             />
-            <button type="button" className="btn-ghost-small" onClick={onCancel}>Annuler</button>
+            <button 
+              type="submit" 
+              className="btn-primary"
+              disabled={loading || !code}
+              style={{opacity: loading ? 0.6 : 1}}
+            >
+              {loading ? 'Validation...' : 'Activer le code'}
+            </button>
+            <button type="button" className="btn-ghost-small" onClick={onCancel} disabled={loading}>
+              Annuler
+            </button>
           </form>
         </div>
       </div>

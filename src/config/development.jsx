@@ -1,7 +1,7 @@
 // Configuration de développement pour BetAI
 const developmentConfig = {
   // URL de l'API backend (localhost en développement)
-  API_BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+  API_BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
   
   // Configuration de l'environnement
   ENVIRONMENT: 'development',

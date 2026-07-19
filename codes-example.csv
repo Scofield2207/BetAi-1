@@ -1,0 +1,7 @@
+code,plan,duration,features
+BETAI-STARTER-101,starter,1_month,"basic_analysis,5_predictions"
+BETAI-STARTER-102,starter,1_month,"basic_analysis,5_predictions"
+BETAI-STARTER-103,starter,1_month,"basic_analysis,5_predictions"
+BETAI-PRO-101,pro,3_months,"advanced_analysis,unlimited_predictions,strategy_simulator"
+BETAI-PRO-102,pro,3_months,"advanced_analysis,unlimited_predictions,strategy_simulator"
+BETAI-EXPERT-101,expert,1_year,"all_features,api_access,dedicated_support"

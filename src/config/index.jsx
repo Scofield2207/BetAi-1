@@ -3,8 +3,8 @@ import developmentConfig from './development';
 import productionConfig from './production';
 
 // Sélection automatique de la configuration selon l'environnement
-const config = process.env.NODE_ENV === 'production' 
-  ? productionConfig 
+const config = import.meta.env.MODE === 'production'
+  ? productionConfig
   : developmentConfig;
 
 // Configuration par défaut

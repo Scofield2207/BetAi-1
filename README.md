@@ -139,8 +139,9 @@ CELTIIS_API_KEY=[Votre clé]
 CELTIIS_API_SECRET=[Votre secret]
 
 # Frontend
-REACT_APP_API_URL=https://betai-backend.onrender.com
+VITE_API_URL=https://betai-backend.onrender.com
 REACT_APP_ENVIRONMENT=production
+VITE_USE_MOCKS=false  # Set to true to use local mock responses instead of the API
 ```
 
 ## 📱 Utilisation
