@@ -1,6 +1,7 @@
 const API_CONFIG = {
   // Base URL configurable par variable d'environnement (fallback localhost)
   BASE_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
+  TIMEOUT_MS: Number(import.meta.env.VITE_API_TIMEOUT_MS || 5000),
   ENDPOINTS: {
     // Authentification
     LOGIN: '/login',

@@ -57,12 +57,12 @@ function AccessCode({ notice, onActivated, onCancel }) {
         // Sauvegarder le plan activé
         localStorage.setItem('userPlan', result.codeData?.plan || 'starter');
         localStorage.setItem('codeActivated', 'true');
+        localStorage.removeItem('lastAccessCode');
         
         // Notifier l'application
         onActivated?.();
         
-        // Afficher un message de succès
-        console.log('✅ Code activé:', result.message);
+        // Afficher un message de succès sans exposer de détail sensible
       } else {
         setError(result.message || 'Activation échouée');
       }

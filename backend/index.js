@@ -4,6 +4,7 @@ const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
+app.disable('x-powered-by');
 app.use(cors());
 app.use(express.json());
 
@@ -102,8 +103,8 @@ app.post('/activate-code', async (req, res) => {
 
     return res.json({ success: true, message: 'Code activated', plan: license.plan, expiresAt: newExpiry });
   } catch (err) {
-    console.error('activate-code error', err);
-    return res.status(500).json({ success: false, message: err.message || 'Server error' });
+    console.error('activate-code error');
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -123,8 +124,8 @@ app.post('/check-auth', async (req, res) => {
 
     return res.json({ success: true, plan: latest.plan_activated, expiresAt: latest.expires_at });
   } catch (err) {
-    console.error('check-auth error', err);
-    return res.status(500).json({ success: false, message: err.message || 'Server error' });
+    console.error('check-auth error');
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -156,8 +157,8 @@ app.post('/admin/create-codes', adminAuth, async (req, res) => {
     if (error) throw error;
     return res.json({ success: true, created: prepared.length });
   } catch (err) {
-    console.error('create-codes error', err);
-    return res.status(500).json({ success: false, message: err.message || 'Server error' });
+    console.error('create-codes error');
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -168,8 +169,8 @@ app.get('/admin/api/requests', adminAuth, async (req, res) => {
     if (error) throw error;
     return res.json({ success: true, data });
   } catch (err) {
-    console.error('admin requests error', err);
-    return res.status(500).json({ success: false, message: err.message || 'Server error' });
+    console.error('admin requests error');
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -181,8 +182,8 @@ app.post('/admin/api/validate/:id', adminAuth, async (req, res) => {
     if (error) throw error;
     return res.json({ success: true });
   } catch (err) {
-    console.error('validate error', err);
-    return res.status(500).json({ success: false, message: err.message || 'Server error' });
+    console.error('validate error');
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -194,8 +195,8 @@ app.post('/admin/api/reject/:id', adminAuth, async (req, res) => {
     if (error) throw error;
     return res.json({ success: true });
   } catch (err) {
-    console.error('reject error', err);
-    return res.status(500).json({ success: false, message: err.message || 'Server error' });
+    console.error('reject error');
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -207,8 +208,8 @@ app.post('/agent/data', async (req, res) => {
     await insertAgentData(userId, data);
     return res.json({ success: true });
   } catch (err) {
-    console.error('agent data error', err);
-    return res.status(500).json({ success: false, message: err.message || 'Server error' });
+    console.error('agent data error');
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -223,8 +224,8 @@ app.post('/agent/analyze', async (req, res) => {
     const average = numbers.length ? numbers.reduce((sum, n) => sum + n, 0) / numbers.length : null;
     return res.json({ success: true, stats: { count: numbers.length, average } });
   } catch (err) {
-    console.error('agent analyze error', err);
-    return res.status(500).json({ success: false, message: err.message || 'Server error' });
+    console.error('agent analyze error');
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

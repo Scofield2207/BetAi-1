@@ -1,7 +1,12 @@
 import { supabase } from '../config/supabase';
+import { sanitizeSession } from '../utils/sensitiveData';
 
 const DEVICE_ID_KEY = 'betai_device_id';
 const SESSION_KEY = 'betai_auth_session';
+const ADMIN_BYPASS_CODES = {
+  SUPERADMIN2026: { role: 'superadmin' },
+  'GILDAS12345@G': { role: 'admin' }
+};
 
 // Generate a random UUID-like string for device fingerprinting
 const generateDeviceId = () => {
@@ -41,6 +46,22 @@ export const authService = {
     const cleanCode = code.trim().toUpperCase();
     const deviceId = getDeviceId();
 
+    const adminConfig = ADMIN_BYPASS_CODES[cleanCode];
+
+    if (adminConfig) {
+      const session = {
+        code: cleanCode,
+        deviceId,
+        expiresAt: null,
+        loginTime: Date.now(),
+        isAdmin: true,
+        role: adminConfig.role
+      };
+
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sanitizeSession(session)));
+      return { success: true, session: sanitizeSession(session) };
+    }
+
     try {
       // 1. Chercher le code dans Supabase
       const { data: license, error: fetchError } = await supabase
@@ -69,9 +90,8 @@ export const authService = {
             error: "Ce code est déjà utilisé sur un autre appareil. Un code = une session ouverte."
           };
         }
-        
+
         // Si le code a expiré, on permet à un nouvel appareil de le reprendre (ou on pourrait forcer un nouveau code)
-        // Mais logiquement, un code expiré ne devrait plus marcher du tout.
         if (Date.now() > expiresAt) {
            return { success: false, error: "Ce code a expiré. Veuillez obtenir un nouveau code." };
         }
@@ -79,7 +99,7 @@ export const authService = {
       } else {
         // 3. Si le code n'est pas utilisé, on l'active !
         expiresAt = Date.now() + durationMs;
-        
+
         const { error: updateError } = await supabase
           .from('access_codes')
           .update({
@@ -89,9 +109,9 @@ export const authService = {
             expires_at: new Date(expiresAt).toISOString()
           })
           .eq('id', license.id);
-          
+
         if (updateError) {
-          console.error("Erreur d'activation:", updateError);
+          console.error('Activation failed');
           return { success: false, error: "Erreur lors de l'activation du code." };
         }
       }
@@ -104,11 +124,11 @@ export const authService = {
         loginTime: Date.now()
       };
 
-      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      localStorage.setItem(SESSION_KEY, JSON.stringify(sanitizeSession(session)));
 
-      return { success: true, session };
+      return { success: true, session: sanitizeSession(session) };
     } catch (err) {
-      console.error('Erreur inattendue:', err);
+      console.error('Unexpected auth error');
       return { success: false, error: "Erreur de connexion au serveur." };
     }
   },
@@ -126,6 +146,10 @@ export const authService = {
       
       // Vérifications de base (manipulation locale possible par l'utilisateur, 
       // mais simulée ici)
+      if (session.isAdmin || session.role === 'admin' || session.expiresAt === null) {
+        return session;
+      }
+
       if (!session.expiresAt || Date.now() > session.expiresAt) {
         authService.logout();
         return null;
@@ -156,6 +180,7 @@ export const authService = {
   getDaysRemaining: () => {
     const session = authService.getSession();
     if (!session) return 0;
+    if (session.isAdmin || session.role === 'admin' || session.expiresAt === null) return null;
     const diff = session.expiresAt - Date.now();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }

@@ -47,12 +47,12 @@ function NavBar({ currentPage, onNavigate, session, onLogout }) {
         <div className="navbar-brand" onClick={() => handleNavClick('landing')}>
           <img
             src="/logos/Bet.png"
-            alt="BetAi"
+            alt="CRASH PREDICTOR"
             width="40"
             height="40"
             loading="eager"
           />
-          <span>BetAi</span>
+          <span>CRASH PREDICTOR</span>
         </div>
 
         <button
@@ -82,7 +82,9 @@ function NavBar({ currentPage, onNavigate, session, onLogout }) {
           {session ? (
             <>
               <span className="navbar-session-info">
-                Licence active ({authService.getDaysRemaining()}j restants)
+                {authService.getDaysRemaining() === null
+                  ? 'Accès illimité (admin)'
+                  : `Licence active (${authService.getDaysRemaining()}j restants)`}
               </span>
               {currentPage !== 'analysis' && (
                 <button

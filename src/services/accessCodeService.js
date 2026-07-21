@@ -92,7 +92,7 @@ export const accessCodeService = {
           }
         ]);
 
-      if (activationError) console.warn('Erreur enregistrement activation:', activationError);
+      if (activationError) console.warn('Activation record storage failed');
 
       return {
         success: true,
@@ -104,7 +104,7 @@ export const accessCodeService = {
         }
       };
     } catch (error) {
-      console.error('Erreur validation code:', error);
+      console.error('Code validation failed');
       return {
         success: false,
         message: error.message || 'Une erreur est survenue lors de la validation du code.'
@@ -128,7 +128,7 @@ export const accessCodeService = {
       if (error) throw error;
       return data && data.length > 0;
     } catch (error) {
-      console.error('Erreur vérification activation:', error);
+      console.error('Activation check failed');
       return false;
     }
   },
@@ -166,7 +166,7 @@ export const accessCodeService = {
 
       return null;
     } catch (error) {
-      console.error('Erreur récupération plan utilisateur:', error);
+      console.error('User plan lookup failed');
       return null;
     }
   },
@@ -201,7 +201,7 @@ export const accessCodeService = {
         createdCount: codes.length
       };
     } catch (error) {
-      console.error('Erreur création codes:', error);
+      console.error('Code creation failed');
       return {
         success: false,
         message: 'Erreur lors de la création des codes d\'accès.'

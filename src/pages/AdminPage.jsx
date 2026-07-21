@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../config/supabase';
+import { redactCodesForAdmin } from '../utils/sensitiveData';
 import './AdminPage.css';
 
-const ADMIN_PASSWORD = 'superadmin2026';
+const ADMIN_PASSWORD = 'SUPERADMIN2026';
 
 function AdminPage({ onGoHome }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('adminAuth') === 'true');
@@ -21,7 +22,9 @@ function AdminPage({ onGoHome }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (passwordInput === ADMIN_PASSWORD) {
+    const normalizedPassword = passwordInput.trim().toUpperCase();
+
+    if (normalizedPassword === ADMIN_PASSWORD) {
       sessionStorage.setItem('adminAuth', 'true');
       setIsAuthenticated(true);
     } else {
@@ -40,7 +43,7 @@ function AdminPage({ onGoHome }) {
       console.error('Fetch error:', error);
       setError('Impossible de charger les codes.');
     } else {
-      setCodes(data || []);
+      setCodes(redactCodesForAdmin(data || []));
     }
     setLoading(false);
   };
@@ -104,7 +107,7 @@ function AdminPage({ onGoHome }) {
               type="password" 
               placeholder="Mot de passe" 
               value={passwordInput}
-              onChange={(e) => setPasswordInput(e.target.value)}
+              onChange={(e) => setPasswordInput(e.target.value.toUpperCase())}
               required
             />
             <button type="submit" className="btn-primary">Entrer</button>

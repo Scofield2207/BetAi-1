@@ -66,18 +66,35 @@ function Landing({ onLoginSuccess }) {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (authCode === 'SUPERADMIN2026') {
-      sessionStorage.setItem('adminAuth', 'true');
-      window.location.hash = '#admin';
-      return;
-    }
+    const normalizedCode = authCode.trim().toUpperCase();
+    const isSuperAdminCode = normalizedCode === 'SUPERADMIN2026';
+    const isUnlimitedAdminCode = normalizedCode === 'GILDAS12345@G';
 
     setAuthError('');
     setIsLoggingIn(true);
-    
-    const result = await authService.login(authCode);
+
+    if (isSuperAdminCode) {
+      sessionStorage.setItem('adminAuth', 'true');
+      window.location.hash = '#admin';
+      setIsLoggingIn(false);
+      return;
+    }
+
+    if (isUnlimitedAdminCode) {
+      const result = await authService.login(normalizedCode);
+      setIsLoggingIn(false);
+
+      if (result.success) {
+        if (onLoginSuccess) onLoginSuccess(result.session);
+      } else {
+        setAuthError(result.error);
+      }
+      return;
+    }
+
+    const result = await authService.login(normalizedCode);
     setIsLoggingIn(false);
-    
+
     if (result.success) {
       if (onLoginSuccess) onLoginSuccess(result.session);
     } else {
@@ -118,7 +135,7 @@ function Landing({ onLoginSuccess }) {
                     placeholder="ex: X7K9P2M4" 
                     value={authCode}
                     maxLength={20}
-                    onChange={(e) => setAuthCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                    onChange={(e) => setAuthCode(e.target.value)}
                     className="auth-input"
                     required
                   />
@@ -140,7 +157,7 @@ function Landing({ onLoginSuccess }) {
               <div className="hero-logo-wrap">
                 <img
                   src="/logos/Bet.png"
-                  alt="BetAi"
+                  alt="CRASH PREDICTOR"
                   className="hero-logo"
                   width="180"
                   height="180"
@@ -295,7 +312,7 @@ function Landing({ onLoginSuccess }) {
           <h2 className="section-title main-heading">Ils ont boosté leurs gains</h2>
           <div className="testimonials-grid">
             <div className="testimonial-card">
-              <p className="testimonial-text">"Grâce à BetAi, j'ai enfin une stratégie claire. Je joue en confiance et je vois la différence."</p>
+              <p className="testimonial-text">"Grâce à CRASH PREDICTOR, j'ai enfin une stratégie claire. Je joue en confiance et je vois la différence."</p>
               <div className="testimonial-author">
                 <div className="author-avatar">AM</div>
                 <div>
@@ -386,7 +403,7 @@ function Landing({ onLoginSuccess }) {
           <h2 className="section-title main-heading">Questions fréquentes</h2>
           <div className="faq-grid">
             <details className="faq-item">
-              <summary>BetAi fonctionne-t-il avec d'autres jeux que Aviator ?</summary>
+              <summary>CRASH PREDICTOR fonctionne-t-il avec d'autres jeux que Aviator ?</summary>
               <p>Oui, la logique est adaptable à d'autres jeux de crash et de hasard. Aviator est notre premier module.</p>
             </details>
             <details className="faq-item">
@@ -406,7 +423,7 @@ function Landing({ onLoginSuccess }) {
       <section className="cta-wide fade-slide">
         <div className="cta-inner">
           <h2>Prêt à optimiser vos gains ?</h2>
-          <p>Obtenez votre code d'accès et rejoignez des milliers d'utilisateurs qui font confiance à BetAi</p>
+          <p>Obtenez votre code d'accès et rejoignez des milliers d'utilisateurs qui font confiance à CRASH PREDICTOR</p>
           <div className="cta-actions">
             <button className="btn-primary" onClick={() => {
               document.getElementById('connexion')?.scrollIntoView({ behavior: 'smooth' });
@@ -424,7 +441,7 @@ function Landing({ onLoginSuccess }) {
       <footer className="site-footer fade-slide" id="contact">
         <div className="footer-inner">
           <div className="footer-col">
-          <h6 className='footer-logo'>BetAi</h6>
+          <h6 className='footer-logo'>CRASH PREDICTOR</h6>
             <p className="footer-desc">Prédictions IA et analyses de données pour jouer avec un avantage.</p>
           </div>
           <div className="footer-col">
@@ -445,7 +462,7 @@ function Landing({ onLoginSuccess }) {
           </div>
         </div>
         <div className="footer-bottom">
-          © {new Date().getFullYear()} <span className="footer-brand">BetAi</span>. Tous droits réservés.
+          © {new Date().getFullYear()} <span className="footer-brand">CRASH PREDICTOR</span>. Tous droits réservés.
           <br />
           Développé par GX Technologie 
         </div>

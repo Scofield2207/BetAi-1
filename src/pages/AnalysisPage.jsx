@@ -10,7 +10,7 @@ import './AnalysisPage.css';
 
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCKS === 'true';
 
-const mockDelay = (ms = 650) =>
+const mockDelay = (ms = 250) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
@@ -22,8 +22,21 @@ const shouldUseMockFallback = (error) => {
   return (
     message.includes('failed to fetch') ||
     message.includes('network') ||
-    message.includes('connection refused')
+    message.includes('connection refused') ||
+    message.includes('aborted') ||
+    message.includes('timeout')
   );
+};
+
+const fetchWithTimeout = async (url, options = {}, timeoutMs = API_CONFIG.TIMEOUT_MS) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 };
 
 const scrollToSection = (id) => {
@@ -83,7 +96,7 @@ function AnalysisPage({ onGoHome }) {
     }
 
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PREDICT}`, {
+      const response = await fetchWithTimeout(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PREDICT}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
